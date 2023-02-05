@@ -13,9 +13,9 @@ import base64
 import pandas as pd
 
 
-pat = 'ukb5rcugs45mjfulywpl25cygl3dav7ujsnui7bk3duju3ado42q'
-organization = 'go-gl-pr-migfactory-axa365'
-project = 'AXA%20MPI%20Test%20Project%20(DO%20NOT%20USE)'
+pat = 'uk**'
+organization = 'go**'
+project = 'AX**'
 
 authorization = str(base64.b64encode(bytes(':'+pat, 'ascii')), 'ascii')
 
