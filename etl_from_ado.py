@@ -3,24 +3,31 @@
 # child is not verified, here forward should mean child
 # getting the if from line is done from left, can be from right to decrease read time
 # wave of app can be extracted with additional read of item, parent_id contains wave_id
+# if main ...
+# currently all referenced by ado ids, it's NOK if we'll use several projects
+# don't get server list in app table
+
 
 import requests
 import base64
 import pandas as pd
 
 
-pat = 'ukb5***'
-organization = 'go-gl-***'
-project = 'AX***'
+pat = 'ukb5rcugs45mjfulywpl25cygl3dav7ujsnui7bk3duju3ado42q'
+organization = 'go-gl-pr-migfactory-axa365'
+project = 'AXA%20MPI%20Test%20Project%20(DO%20NOT%20USE)'
 
 authorization = str(base64.b64encode(bytes(':'+pat, 'ascii')), 'ascii')
 
+
 # initialization dataFrame
-cols =  ["ID in Azure", "Title", "Servers", "Environment", "State", "Entity", "Date", "Wave"]
-cols_servers = ["ID in Azure", "Title", "FQDN", "Sign-off Ops", "Sign-off Cyber"]
+cols =  ["App id in ADO", "Title", "Servers", "Environment", "State", "Entity", "Date", "Wave"]
+cols_servers = ["Server id in ADO", "Title", "FQDN", "Sign-off Ops", "Sign-off Cyber"]
+cols_map_servers_apps = ["Server id in ADO", "App id in ADO"]
 
 df_applications = pd.DataFrame([],  columns = cols)
 df_servers = pd.DataFrame([],  columns = cols_servers)
+df_map_server_vs_app = pd.DataFrame([],  columns = cols_map_servers_apps)
 
 
 def get_app_list_for_the_wave(list_of_applications):
@@ -163,8 +170,14 @@ def get_server_wi_ids_from_application(application_id):
         url = url,
         headers=headers,
     )
+    
     # go through features of an app
-    wi_relations = response.json()["relations"]
+    # not all applications have servers stored in ADO
+    try:
+        wi_relations = response.json()["relations"]
+    except: 
+        wi_relations = ""
+
     for relation in wi_relations:
         if relation["rel"] == "System.LinkTypes.Hierarchy-Forward":
             # need to go deeper to find servers
@@ -305,6 +318,46 @@ def get_all_servers_list_from_ado():
 
 
 
+def get_all_applications_list_from_ado():
+    """
+    The function uses query that is defined in ADO
+    The mentioned query displays the list of all applications (for all waves in the projects)
+    The function exists to create mapping between applications and servers
+    """
+    list_of_all_applications = []
+    
+    url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/wiql/ba4ac073-2c3d-485a-a36f-2cbb53267487"
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Basic '+ authorization
+    }
+    response = requests.get(
+        url = url,
+        headers=headers,
+    )
+    applications_raw_data = response.json()["workItems"]
+    for application in applications_raw_data:
+        list_of_all_applications.append(application["id"])
+    return list_of_all_applications
+
+
+def save_map_server_vs_app(application_wi_id, df_map_server_vs_app): 
+    """
+    Get a map between ids (servers vs applications)
+    """
+    
+    list_of_servers = get_server_wi_ids_from_application(application_id)
+    for server_id_ado in list_of_servers: 
+        new_row = [server_id_ado, application_wi_id]
+        new_df = pd.DataFrame([new_row], columns=cols_map_servers_apps)
+        # load data into a DataFrame object:
+        df_map_server_vs_app = pd.concat([df_map_server_vs_app, new_df], ignore_index = True)  
+    return df_map_server_vs_app
+
+
+
+
+
 
 
 # MAIN
@@ -322,16 +375,26 @@ for application in list_of_applications:
 for application_id in list_of_applications: 
     df_applications = save_application_wi_into_data_frame(application_id, df_applications)
 
-print(df_applications)
-# df_applications.to_csv('applications_extract.csv')
+# print(df_applications)
+df_applications.to_csv('applications_extract.csv')
 
 
 
 # get list of servers
 # for each server save into df
+
 list_of_servers = get_all_servers_list_from_ado()
 for server in list_of_servers:
     df_servers = save_server_wi_into_data_frame(server, df_servers)
 
-print(df_servers)
-# df_servers.to_csv('extract_servers.csv')
+# print(df_servers)
+df_servers.to_csv('extract_servers.csv')
+
+
+# map applications with servers
+list_of_all_applications = get_all_applications_list_from_ado()
+for application_id in list_of_all_applications: 
+    df_map_server_vs_app = save_map_server_vs_app(application_id, df_map_server_vs_app)
+
+# print(df_map_server_vs_app)
+df_map_server_vs_app.to_csv('extract_map_servers_vs_applications.csv')
