@@ -359,7 +359,6 @@ def save_map_server_vs_app(application_wi_id, df_map_server_vs_app):
 
 
 
-
 # MAIN
 # global storage var
 list_of_applications = []
