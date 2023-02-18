@@ -22,12 +22,14 @@ authorization = str(base64.b64encode(bytes(':'+pat, 'ascii')), 'ascii')
 
 
 # initialization dataFrame
-# cols =  ["App id in ADO", "Title", "Servers", "Environment", "State", "Entity", "Date", "Wave"]
-cols =  ["App id in ADO", "Title", "Environment", "State", "Entity", "Date", "Wave"]
+# app view
+# cols =  ["App id in ADO", "Title", "Environment", "State", "Entity", "Date", "Wave"]
+cols =  ["App id in ADO", "Title", "Environment", "State", "Entity", "Planned Assessment Date", "Planned Replication Date", "PlannedPostMigrationDate", "Planned Design Date", "Planned Go Live Date", "Wave"]
 
 # cols_servers = ["Server id in ADO", "Title", "FQDN", "Sign-off Ops", "Sign-off Cyber"]
 cols_servers = ["Server id in ADO", "Title", "FQDN", "Sign-off Ops", "Sign-off Cyber", "App id in ADO"]
 
+#mapping of servers vs applications
 cols_map_servers_apps = ["Server id in ADO", "App id in ADO"]
 
 
@@ -107,12 +109,37 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         wi_state = response.json()["fields"]["System.State"]
     except: 
         wi_state = ""
-
-    # application item assessment date
+    #
+    #
+    #
+    # app dates // TCS
     try:
-        wi_date = response.json()["fields"]["Custom.PlannedPreAssessmentStart"]
+        wi_pln_asmnt_date = response.json()["fields"]["Custom.PlannedAssessmentDate"]
     except: 
-        wi_date = ""
+        wi_pln_asmnt_date = ""
+
+    try:
+        wi_pln_rplcn_date = response.json()["fields"]["Custom.PlannedReplicationDate"]
+    except: 
+        wi_pln_rplcn_date = ""
+
+    try:
+        wi_pst_mig_date = response.json()["fields"]["Custom.PlannedPostMigrationDate"]
+    except: 
+        wi_pst_mig_date = ""
+
+    try:
+        wi_pln_dsgn_date = response.json()["fields"]["Custom.PlannedDesignDate"]
+    except: 
+        wi_pln_dsgn_date = ""
+
+    try:
+        wi_pln_go_live_date = response.json()["fields"]["Custom.PlannedGoLiveDate"]
+    except: 
+        wi_pln_go_live_date = ""
+    #
+    #
+    #
 
     wi_wave = "wave_2"
 
@@ -120,7 +147,19 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
     list_of_ids_of_servers = []
     # list_of_ids_of_servers = get_server_wi_ids_from_application(application_wi_id)
 
-    new_row = [application_wi_id, wi_title, wi_env, wi_state, wi_entity, wi_date, wi_wave]
+    new_row = [
+        application_wi_id, 
+        wi_title, 
+        wi_env, 
+        wi_state, 
+        wi_entity, 
+        wi_pln_asmnt_date, 
+        wi_pln_rplcn_date, 
+        wi_pst_mig_date, 
+        wi_pln_dsgn_date, 
+        wi_pln_go_live_date, 
+        wi_wave
+        ]
     new_df = pd.DataFrame([new_row], columns=cols)
     
     # load data into a DataFrame object:
