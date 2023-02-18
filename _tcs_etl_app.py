@@ -24,16 +24,63 @@ authorization = str(base64.b64encode(bytes(':'+pat, 'ascii')), 'ascii')
 # initialization dataFrame
 # app view
 # cols =  ["App id in ADO", "Title", "Environment", "State", "Entity", "Date", "Wave"]
-cols =  ["App id in ADO", "Title", "Environment", "State", "Entity", "Planned Assessment Date", "Planned Replication Date", "PlannedPostMigrationDate", "Planned Design Date", "Planned Go Live Date", "Wave"]
+cols_app =  [
+    "App id in ADO", 
+    "Title", 
+    "Environment",
+    "State", 
+    "Entity",
+    "Planned cut-over date",
+    "Actual cut-over date",
+    # "Planned Assessment Date", 
+    # "Planned Replication Date", 
+    # "PlannedPostMigrationDate", 
+    # "Planned Design Date", 
+    # "Planned Go Live Date",
+    "Data center",
+    # "Rollback",
+    "Blocker details",
+    "De-scoping Details",
+    "Flow opening confirmation", # not available
+    "Last minute reschedule",
+    "Migration eligibility",
+    "Planned Wave", # not available
+    "Internet  access through proxies",
+    "Outbound Emails",
+    "Reverse Proxies",
+    "WAC",
+    "WAF",
+    "VPN",
+    "Load Balancer",
+    "Service Account in local AD domains",
+    "Encryption",
+    "Secret data",
+    "Fileshare",
+    "Administration through specific Jump servers",
+    "Access through specific Citrix Jump servers",
+    "Out of business hours",
+    "Zero downtime requirements",
+    "Risk level",
+    "Factory",
+    # "Last update",
+    # "Wave"
+    ]
 
 # cols_servers = ["Server id in ADO", "Title", "FQDN", "Sign-off Ops", "Sign-off Cyber"]
-cols_servers = ["Server id in ADO", "Title", "FQDN", "Sign-off Ops", "Sign-off Cyber", "App id in ADO"]
+cols_servers = [
+    "Server id in ADO", 
+    "Title", 
+    "FQDN", 
+    "Sign-off Ops", 
+    "Sign-off Cyber", 
+    "App id in ADO"
+    ]
 
 #mapping of servers vs applications
 cols_map_servers_apps = ["Server id in ADO", "App id in ADO"]
 
 
-df_applications = pd.DataFrame([],  columns = cols)
+df_applications = pd.DataFrame([],  columns = cols_app)
 df_servers = pd.DataFrame([],  columns = cols_servers)
 df_map_server_vs_app = pd.DataFrame([],  columns = cols_map_servers_apps)
 
@@ -89,64 +136,98 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         url = url,
         headers=headers,
     )
-    # application item Title
-    wi_title = response.json()["fields"]["System.Title"]
 
-    # application item Environment
-    try:
-        wi_env = response.json()["fields"]["Custom.EnvironmentTargetSubscription"]
-    except: 
-        wi_env = ""
+    # list of app attributes
+    # is used to use cycles
+    app_attributes = []
+    '''
+    app_attributes = [
+        application_wi_id, 
+        wi_title, 
+        wi_env, 
+        wi_state, 
+        wi_entity, 
+        # wi_pln_asmnt_date, 
+        # wi_pln_rplcn_date, 
+        wi_pst_mig_date, # planned cut-over
+        # wi_pln_dsgn_date, 
+        # wi_pln_go_live_date, 
+        wi_mig_date, # actual cut-over
+        wi_wave
+    ]
+    '''
+
+    # list of keys in ADO
+    app_keys_ado = [
+        "System.Title", 
+        "Custom.Environment",
+        "System.State",
+        "Custom.Entity",
+        "Custom.202e1741-c1e6-4f30-b29f-d0b52c686578", # planned cut-over date
+        "Custom.ActualCutOverDate",
+        # "Custom.PlannedAssessmentDate",
+        # "Custom.PlannedReplicationDate",
+        
+        # The keys below are unavailable in current template of ADO for TCS:
+        "Custom.DataCenter",
+        "Custom.BlockerReason",
+        "Custom.DeScopingDetails" # should go deeper
+        "Custom.DeScopingDetails", # should go deeper
+        "Flow opening confirmation", # not available # why not empty
+        "Last minute reschedule",
+        "Custom.MigrationEligibility", # ok
+        "Custom.Wave", # not available
+        "Internet access through proxies",
+        "Outbound Emails",
+        "Reverse Proxies",
+        "WAC",
+        "WAF",
+        "VPN",
+        "Load Balancer",
+        "Service Account in local AD domains",
+        "Encryption",
+        "Secret data",
+        "Fileshare",
+        "Administration through specific Jump servers",
+        "Access through specific Citrix Jump servers",
+        "Out of business hours",
+        "Zero downtime requirements",
+        "Risk level", 
+
+        "Custom.ApplicationOwnershipOrganization",
+        # "System.RevisedDate",
+        #"Custom.Wave"
+    ]
+
+    # Try to get data from ADO using keys, 
+    # if key not found, save empty space
+    for i in range(len(app_keys_ado)):
+        try:
+            # app_attributes[i+1] = response.json()["fields"][app_keys_ado[i]] # may be need to string
+            app_attributes.insert(i+1, response.json()["fields"][app_keys_ado[i]])  # may be need to string
+        except: 
+            # app_attributes[i+1] = ""
+            app_attributes.insert(i+1, "")
     
-    # application item entity
-    try:
-        wi_entity = response.json()["fields"]["Custom.Entity"]
-    except: 
-        wi_entity = ""
+    # app_attributes[0] = application_wi_id
+    app_attributes.insert(0, application_wi_id)
+    # app_attributes.insert(len(app_attributes)+1, "wave_2")
+    
 
-    # application item state
-    try:
-        wi_state = response.json()["fields"]["System.State"]
-    except: 
-        wi_state = ""
-    #
-    #
-    #
-    # app dates // TCS
-    try:
-        wi_pln_asmnt_date = response.json()["fields"]["Custom.PlannedAssessmentDate"]
-    except: 
-        wi_pln_asmnt_date = ""
 
-    try:
-        wi_pln_rplcn_date = response.json()["fields"]["Custom.PlannedReplicationDate"]
-    except: 
-        wi_pln_rplcn_date = ""
-
-    try:
-        wi_pst_mig_date = response.json()["fields"]["Custom.PlannedPostMigrationDate"]
-    except: 
-        wi_pst_mig_date = ""
-
-    try:
-        wi_pln_dsgn_date = response.json()["fields"]["Custom.PlannedDesignDate"]
-    except: 
-        wi_pln_dsgn_date = ""
-
-    try:
-        wi_pln_go_live_date = response.json()["fields"]["Custom.PlannedGoLiveDate"]
-    except: 
-        wi_pln_go_live_date = ""
-    #
-    #
-    #
-
-    wi_wave = "wave_2"
+    # wi_wave = "wave_2"
 
     # add list of servers
     list_of_ids_of_servers = []
     # list_of_ids_of_servers = get_server_wi_ids_from_application(application_wi_id)
-
+    #
+    #
+    #
+    new_row = app_attributes
+    #
+    #
+    #
+    '''
     new_row = [
         application_wi_id, 
         wi_title, 
@@ -160,7 +241,8 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         wi_pln_go_live_date, 
         wi_wave
         ]
-    new_df = pd.DataFrame([new_row], columns=cols)
+    '''
+    new_df = pd.DataFrame([new_row], columns=cols_app)
     
     # load data into a DataFrame object:
     df_applications = pd.concat([df_applications, new_df], ignore_index = True)
@@ -420,7 +502,13 @@ def save_map_server_vs_app(application_wi_id, df_map_server_vs_app):
 list_of_applications = []
 # list_of_applications = get_app_list_for_the_wave(list_of_applications)
 list_of_applications = get_all_applications_list_from_ado()
-
+#
+#
+#
+list_of_applications = [103299]
+#
+#
+#
 # display the list of ids of apps
 '''
 for application in list_of_applications:
@@ -431,8 +519,8 @@ for application in list_of_applications:
 for application_id in list_of_applications: 
     df_applications = save_application_wi_into_data_frame(application_id, df_applications)
 
-# print(df_applications)
-df_applications.to_csv('tcs_applications_extract.csv')
+print(df_applications.T)
+# df_applications.to_csv('tcs_applications_extract.csv')
 
 
 
@@ -443,8 +531,8 @@ list_of_servers = get_all_servers_list_from_ado()
 for server in list_of_servers:
     df_servers = save_server_wi_into_data_frame(server, df_servers)
 
-# print(df_servers)
-df_servers.to_csv('tcs_servers_extract.csv')
+print(df_servers)
+# df_servers.to_csv('tcs_servers_extract.csv')
 
 
 # map applications with servers
