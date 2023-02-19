@@ -23,10 +23,9 @@ authorization = str(base64.b64encode(bytes(':'+pat, 'ascii')), 'ascii')
 
 # initialization dataFrame
 # app view
-# cols =  ["App id in ADO", "Title", "Environment", "State", "Entity", "Date", "Wave"]
 cols_app =  [
     "App id in ADO", 
-    "Title", 
+    "App name", 
     "Environment",
     "State", 
     "Entity",
@@ -62,6 +61,8 @@ cols_app =  [
     "Zero downtime requirements",
     "Risk level",
     "Factory",
+    "Sign-off DBA", # NOK
+    "Sign-off Entity", # NOK
     # "Last update",
     # "Wave"
     ]
@@ -69,10 +70,10 @@ cols_app =  [
 # cols_servers = ["Server id in ADO", "Title", "FQDN", "Sign-off Ops", "Sign-off Cyber"]
 cols_servers = [
     "Server id in ADO", 
-    "Title", 
+    "Server", 
     "FQDN", 
     "Sign-off Ops", 
-    "Sign-off Cyber", 
+    "Sign-off Cyber",
     "App id in ADO"
     ]
 
@@ -193,8 +194,9 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         "Out of business hours",
         "Zero downtime requirements",
         "Risk level", 
-
         "Custom.ApplicationOwnershipOrganization",
+        "Sign-off DBA",
+        "Sign-off Entity",
         # "System.RevisedDate",
         #"Custom.Wave"
     ]
@@ -505,7 +507,7 @@ list_of_applications = get_all_applications_list_from_ado()
 #
 #
 #
-list_of_applications = [103299]
+# list_of_applications = [103299, 105807, 106002]
 #
 #
 #
@@ -519,8 +521,8 @@ for application in list_of_applications:
 for application_id in list_of_applications: 
     df_applications = save_application_wi_into_data_frame(application_id, df_applications)
 
-print(df_applications.T)
-# df_applications.to_csv('tcs_applications_extract.csv')
+# print(df_applications)
+df_applications.to_csv('tcs_applications_extract.csv')
 
 
 
@@ -531,8 +533,8 @@ list_of_servers = get_all_servers_list_from_ado()
 for server in list_of_servers:
     df_servers = save_server_wi_into_data_frame(server, df_servers)
 
-print(df_servers)
-# df_servers.to_csv('tcs_servers_extract.csv')
+# print(df_servers)
+df_servers.to_csv('tcs_servers_extract.csv')
 
 
 # map applications with servers
