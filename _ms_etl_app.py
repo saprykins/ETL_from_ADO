@@ -67,7 +67,7 @@ cols_app =  [
     # "Wave"
     ]
 
-cols_servers = ["Server id in ADO", "Title", "FQDN", "Sign-off Ops", "Sign-off Cyber"]
+cols_servers = ["Server id in ADO", "Server", "FQDN", "Sign-off Ops", "Sign-off Cyber"]
 cols_map_servers_apps = ["Server id in ADO", "App id in ADO"]
 
 df_applications = pd.DataFrame([],  columns = cols_app)
@@ -441,13 +441,8 @@ def save_map_server_vs_app(application_wi_id, df_map_server_vs_app):
 # MAIN
 # global storage var
 list_of_applications = []
-#
-#
-#
 list_of_applications = get_app_list_for_the_wave(list_of_applications)
-#
-#
-#
+
 # list_of_applications = [133733]
 
 # display the list of ids of apps
@@ -461,19 +456,19 @@ for application_id in list_of_applications:
     df_applications = save_application_wi_into_data_frame(application_id, df_applications)
 
 # print(df_applications.T)
-df_applications.to_csv('apps_w2.csv')
+df_applications.to_csv('__ms_applications_extract.csv')
 
 
 # get list of servers
 # for each server save into df
 
-'''
+
 list_of_servers = get_all_servers_list_from_ado()
 for server in list_of_servers:
     df_servers = save_server_wi_into_data_frame(server, df_servers)
 
 # print(df_servers)
-df_servers.to_csv('servers_w2.csv')
+df_servers.to_csv('__ms_servers_extract.csv')
 
 
 # map applications with servers
@@ -482,5 +477,5 @@ for application_id in list_of_all_applications:
     df_map_server_vs_app = save_map_server_vs_app(application_id, df_map_server_vs_app)
 
 # print(df_map_server_vs_app)
-df_map_server_vs_app.to_csv('map_server_app_w2.csv')
-'''
+df_map_server_vs_app.to_csv('__ms_mapping.csv')
+
