@@ -439,6 +439,8 @@ def save_map_server_vs_app(application_wi_id, df_map_server_vs_app):
 
 
 # MAIN
+start_time = time.time()/60 # sec
+
 # global storage var
 list_of_applications = []
 list_of_applications = get_app_list_for_the_wave(list_of_applications)
@@ -479,3 +481,6 @@ for application_id in list_of_all_applications:
 # print(df_map_server_vs_app)
 df_map_server_vs_app.to_csv('__ms_mapping.csv')
 
+
+end_time = time.time()/60 # sec
+print(end_time - start_time)
