@@ -501,6 +501,10 @@ def save_map_server_vs_app(application_wi_id, df_map_server_vs_app):
 
 # MAIN
 # global storage var
+
+
+start_time = time.time()
+
 list_of_applications = []
 # list_of_applications = get_app_list_for_the_wave(list_of_applications)
 list_of_applications = get_all_applications_list_from_ado()
@@ -546,3 +550,6 @@ for application_id in list_of_all_applications:
 
 # print(df_map_server_vs_app)
 # df_map_server_vs_app.to_csv('tcs_map_servers_vs_applications_extract.csv')
+
+end_time = time.time()
+print(end_time - start_time)
