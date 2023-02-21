@@ -522,7 +522,7 @@ for application_id in list_of_applications:
     df_applications = save_application_wi_into_data_frame(application_id, df_applications)
 
 # print(df_applications)
-df_applications.to_csv('tcs_applications_extract.csv')
+df_applications.to_csv('__tcs_applications_extract.csv')
 
 
 
@@ -534,7 +534,7 @@ for server in list_of_servers:
     df_servers = save_server_wi_into_data_frame(server, df_servers)
 
 # print(df_servers)
-df_servers.to_csv('tcs_servers_extract.csv')
+df_servers.to_csv('__tcs_servers_extract.csv')
 
 
 # map applications with servers
