@@ -1,0 +1,324 @@
+import requests
+import base64
+import pandas as pd
+import time
+
+pat = '7**'
+organization = 'g**'
+project = 'M*'
+
+authorization = str(base64.b64encode(bytes(':'+pat, 'ascii')), 'ascii')
+
+
+# initialization dataFrame
+# cols =  ["App id in ADO", "Title", "Servers", "Environment", "State", "Entity", "Date", "Wave"]
+# cols_app =  ["App id in ADO", "Title", "Environment", "State", "Entity", "Date", "Wave"]
+cols_app =  [
+    "App id in ADO", 
+    "App name", 
+    "Environment",
+    "State", 
+    "Entity",
+    "Planned cut-over date",
+    "Actual cut-over date",
+    # "Planned Assessment Date", 
+    # "Planned Replication Date", 
+    # "PlannedPostMigrationDate", 
+    # "Planned Design Date", 
+    # "Planned Go Live Date",
+    "Data center",
+    # "Rollback",
+    "Blocker details",
+    "De-scoping Details",
+    "Flow opening confirmation", # not available
+    "Last minute reschedule",
+    "Migration eligibility",
+    "Planned Wave", # not available
+    "Internet  access through proxies",
+    "Outbound Emails",
+    "Reverse Proxies",
+    "WAC",
+    "WAF",
+    "VPN",
+    "Load Balancer",
+    "Service Account in local AD domains",
+    "Encryption",
+    "Secret data",
+    "Fileshare",
+    "Administration through specific Jump servers",
+    "Access through specific Citrix Jump servers",
+    "Out of business hours",
+    "Zero downtime requirements",
+    "Risk level",
+    "Factory",
+    "Sign-off DBA", # NOK
+    "Sign-off Entity", # NOK
+    # "Last update",
+    # "Wave"
+    ]
+
+cols_servers = ["Server id in ADO", "Server", "FQDN", "Sign-off Ops", "Sign-off Cyber"]
+cols_map_servers_apps = ["Server id in ADO", "App id in ADO"]
+cols_apps_pm = ["App pm WI", "App name", "App phase", "Wave"]
+cols_app_pm_vs_mig_pm = ["Mig pm WI", "App pm WI"]
+cols_migs_pm = ["Mig pm WI", "State", "Mig date", "Mig state"]
+
+df_applications = pd.DataFrame([],  columns = cols_app)
+df_servers = pd.DataFrame([],  columns = cols_servers)
+df_map_server_vs_app = pd.DataFrame([],  columns = cols_map_servers_apps)
+# reporting application pm working item
+df_apps_pm = pd.DataFrame([],  columns = cols_apps_pm)
+df_map_app_pm_vs_mig_pm = pd.DataFrame([],  columns = cols_app_pm_vs_mig_pm)
+df_migs_pm = pd.DataFrame([],  columns = cols_migs_pm)
+
+def get_app_list_for_the_epic(list_of_applications):
+    """
+    MS has reporting project that contains apps. 
+    The reporting project (epic) should be used to find apps (consequently environments and connected migration playbooks in different function)
+    """
+    
+    url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/wiql/d3ec19b5-a4fa-4c36-9071-b379a7f1726c"
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Basic '+ authorization
+    }
+    response = requests.get(
+        url = url,
+        headers=headers,
+    )
+    try:
+        wi_relations = response.json()["workItemRelations"]
+    except: 
+        wi_relations = ""
+
+    for relation in wi_relations:
+        if (relation["rel"] == None):
+            list_of_applications.append(relation["target"]["id"])
+    return list_of_applications
+
+
+def save_app_pm_wi_into_data_frame(application_wi_id, df_apps_pm):   
+    """
+    Get a working item ["App pm WI", "App name", "App phase", "Wave"]
+    and saves it into a dataframe
+    application_wi_id - the application for which data is extracted
+    df_app - used as storage object
+    """
+    
+    url = 'https://dev.azure.com/' + organization + '/_apis/wit/workItems/' + str(application_wi_id) + '?$expand=all'
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Basic '+ authorization
+    }
+    response = requests.get(
+        url = url,
+        headers=headers,
+    )
+
+    # list of app attributes
+    # is used to use cycles
+    app_attributes = []
+
+    app_keys_ado = [
+        "System.Title",
+        # "Custom.ApplicationName", 
+
+        # "System.State",
+        "Custom.ApplicationPhase",
+
+        # "Custom.Entity",
+        # "Custom.Factory",
+
+        "Custom.ScopeWave",
+        # "System.Tags"
+        ]
+
+    # Try to get data from ADO using keys, 
+    # if key not found, save empty space
+    for i in range(len(app_keys_ado)):
+        try:
+            # app_attributes[i+1] = response.json()["fields"][app_keys_ado[i]] # may be need to string
+            app_attributes.insert(i+1, response.json()["fields"][app_keys_ado[i]])  # may be need to string
+        except: 
+            # app_attributes[i+1] = ""
+            app_attributes.insert(i+1, "")
+    
+    app_attributes.insert(0, application_wi_id)
+
+    # new_row = [application_wi_id, wi_title, wi_env, wi_state, wi_entity, wi_date, wi_wave]
+    new_row = app_attributes
+    new_df = pd.DataFrame([new_row], columns=cols_apps_pm)
+    
+    # load data into a DataFrame object:
+    df_apps_pm = pd.concat([df_apps_pm, new_df], ignore_index = True)
+
+    return df_apps_pm
+
+
+
+def save_mig_pm_wi_into_data_frame(application_wi_id, df_migs_pm):
+    """
+    Get a working item ["App pm WI", "App name", "App phase", "Wave"]
+    and saves it into a dataframe
+    application_wi_id - the application for which data is extracted
+    df_app - used as storage object
+    """
+    
+    url = 'https://dev.azure.com/' + organization + '/_apis/wit/workItems/' + str(application_wi_id) + '?$expand=all'
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Basic '+ authorization
+    }
+    response = requests.get(
+        url = url,
+        headers=headers,
+    )
+
+    # list of app attributes
+    # is used to use cycles
+    app_attributes = []
+
+    app_keys_ado = [
+        "System.State",
+        "Custom.MigrationStartDate",
+        "Custom.Migrationexecutionstatus",
+        ]
+
+    # Try to get data from ADO using keys, 
+    # if key not found, save empty space
+    for i in range(len(app_keys_ado)):
+        try:
+            # app_attributes[i+1] = response.json()["fields"][app_keys_ado[i]] # may be need to string
+            app_attributes.insert(i+1, response.json()["fields"][app_keys_ado[i]])  # may be need to string
+        except: 
+            # app_attributes[i+1] = ""
+            app_attributes.insert(i+1, "")
+    
+    app_attributes.insert(0, application_wi_id)
+
+    # new_row = [application_wi_id, wi_title, wi_env, wi_state, wi_entity, wi_date, wi_wave]
+    new_row = app_attributes
+    new_df = pd.DataFrame([new_row], columns=cols_migs_pm)
+    
+    # load data into a DataFrame object:
+    df_migs_pm = pd.concat([df_migs_pm, new_df], ignore_index = True)
+
+    return df_migs_pm
+
+
+
+def get_all_app_pm_from_ado():
+    """
+    The function uses query that is defined in ADO
+    The mentioned query displays the list of all app pms
+    """
+    list_of_all_apps_pm = []
+    
+    url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/wiql/98939b6f-bc12-4b87-a309-876223f9729b"
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Basic '+ authorization
+    }
+    response = requests.get(
+        url = url,
+        headers=headers,
+    )
+    servers_raw_data = response.json()["workItems"]
+    for server in servers_raw_data:
+        list_of_all_apps_pm.append(server["id"])
+    return list_of_all_apps_pm
+
+
+
+def get_server_wi_ids_from_application(application_id):
+    """
+    Given app_id, this function gets ids of its servers
+    """
+
+    url = 'https://dev.azure.com/' + organization + '/_apis/wit/workItems/' + str(application_id) + '?$expand=all'
+    servers_id = []
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Basic '+ authorization
+    }
+    response = requests.get(
+        url = url,
+        headers=headers,
+    )
+    
+    # go through features of an app
+    # not all applications have servers stored in ADO
+    try:
+        wi_relations = response.json()["relations"]
+    except: 
+        wi_relations = ""
+
+    for relation in wi_relations:
+        if relation["rel"] == "System.LinkTypes.Hierarchy-Forward":
+            # need to go deeper to find servers
+            # features can be servers or playbook
+            raw_id = relation['url']
+            start_line = raw_id.find('workItems/') + 10
+            feature_id = int(raw_id[start_line:])
+            # print(feature_id) # correct
+            # list_of_ids_of_servers = get_server_wi_ids_from_feature(feature_id)
+            # if len(list_of_ids_of_servers)>0:
+                # print(list_of_ids_of_servers)
+            servers_id.append(feature_id)
+
+
+    return servers_id
+
+
+def save_map_app_pm_vs_mig_pm(app_pm_wi_id, df_map_app_pm_vs_mig_pm): 
+    """
+    Get a map 
+    """
+    
+    list_of_servers = get_server_wi_ids_from_application(app_pm_wi_id)
+    for server_id_ado in list_of_servers: 
+        new_row = [server_id_ado, app_pm_wi_id]
+        new_df = pd.DataFrame([new_row], columns=cols_app_pm_vs_mig_pm)
+        # load data into a DataFrame object:
+        df_map_app_pm_vs_mig_pm = pd.concat([df_map_app_pm_vs_mig_pm, new_df], ignore_index = True)  
+    return df_map_app_pm_vs_mig_pm
+
+
+
+# apps pm
+list_of_applications = []
+list_of_applications = [137937, 137847]
+# list_of_applications = get_app_list_for_the_epic(list_of_applications)
+
+# display the list of ids of apps
+'''
+for application in list_of_applications:
+    print(application)
+'''
+for application_id in list_of_applications: 
+    df_apps_pm = save_app_pm_wi_into_data_frame(application_id, df_apps_pm)
+
+# short description of apps pm
+print(df_apps_pm)
+
+
+# map
+list_of_all_app_pms = get_all_app_pm_from_ado()
+# print(list_of_all_app_pms)
+list_of_all_app_pms = [137864]
+
+
+
+for application_id in list_of_all_app_pms:
+    # print(application_id)
+    df_map_app_pm_vs_mig_pm = save_map_app_pm_vs_mig_pm(application_id,df_map_app_pm_vs_mig_pm)
+
+# map between app pm and mig pm
+print(df_map_app_pm_vs_mig_pm)
+
+
+# describe mig
+list_of_migs = [137865, 137866]
+for mig_id in list_of_migs: 
+    df_migs_pm = save_mig_pm_wi_into_data_frame(mig_id, df_migs_pm)
+print(df_migs_pm)
