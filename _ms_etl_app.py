@@ -73,6 +73,18 @@ cols_map_servers_apps = ["Server id in ADO", "App id in ADO"]
 df_applications = pd.DataFrame([],  columns = cols_app)
 df_servers = pd.DataFrame([],  columns = cols_servers)
 df_map_server_vs_app = pd.DataFrame([],  columns = cols_map_servers_apps)
+df_dates = pd.read_csv('./results/__afa_dates.csv')
+# pd.set_option('display.max_rows', df_dates.shape[0]+1)
+# print(df_dates)
+
+def get_mig_date(playbook_id):
+    try:
+        date = df_dates.loc[df_dates["Playbook WI"] == playbook_id, "Mig date"]
+    # print(date[0])
+    except:
+        date = ""
+    return date
+
 
 
 def get_app_list_for_the_wave(list_of_applications):
@@ -184,6 +196,14 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
     
     # app_attributes[0] = application_wi_id
     app_attributes.insert(0, application_wi_id)
+
+    # getting date from AFA Reports
+    try: 
+        date = get_mig_date(application_wi_id).values[0] # get only date from series
+    except: 
+        date = ""
+    app_attributes[5] = date
+
     # app_attributes.insert(len(app_attributes)+1, "wave_2")
     # add list of servers
     # list_of_ids_of_servers = []
@@ -198,6 +218,16 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
 
     return df_applications
 
+#
+#
+#
+# dft = save_application_wi_into_data_frame(124554, df_applications)
+# print("---")
+# print(dft.T)
+# print("---")
+#
+#
+#
 
 def get_server_wi_ids_from_feature(feature_id):
     """
