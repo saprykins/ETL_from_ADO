@@ -99,7 +99,7 @@ def get_app_list_for_the_wave(list_of_applications):
     this is second wave: 89758 (MEX_wave2), 87108(AFA_wave2)
     """
     
-    url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/wiql/efa0655f-dada-47a0-95f1-fe6f15bc139e"
+    url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/wiql/efa0655f-dada-47a0-95f1-fe6f15bc139e" # avanade only
     headers = {
         'Accept': 'application/json',
         'Authorization': 'Basic '+ authorization
@@ -154,7 +154,7 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         
         # The keys below are unavailable in current template of ADO for TCS:
         "Custom.DataCenter",
-        "Custom.LastMinuteReschedule", # de-scoping or blocker detail
+        "Custom.RollbackReason", # de-scoping or blocker detail -> rollback reason
         "Custom.DeScopingDetails" # should go deeper
         "Custom.DeScopingDetails", # should go deeper
         "Custom.Status2", # FW OK
@@ -198,11 +198,14 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
     app_attributes.insert(0, application_wi_id)
 
     # getting date from AFA Reports
+    """
     try: 
         date = get_mig_date(application_wi_id).values[0] # get only date from series
     except: 
         date = ""
     app_attributes[5] = date
+    """
+    app_attributes[-3] = "Microsoft"
 
     # app_attributes.insert(len(app_attributes)+1, "wave_2")
     # add list of servers
@@ -410,7 +413,7 @@ def get_all_servers_list_from_ado():
     """
     list_of_all_servers = []
     
-    url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/wiql/fad91720-c6b5-4e92-be7a-9d98b41d6289"
+    url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/wiql/fad91720-c6b5-4e92-be7a-9d98b41d6289" # servers
     headers = {
         'Accept': 'application/json',
         'Authorization': 'Basic '+ authorization
@@ -474,9 +477,13 @@ start_time = time.time()/60 # sec
 # global storage var
 list_of_applications = []
 list_of_applications = get_app_list_for_the_wave(list_of_applications)
-
+#
+#
+#
 # list_of_applications = [133733]
-
+#
+#
+#
 # display the list of ids of apps
 '''
 for application in list_of_applications:
@@ -488,7 +495,7 @@ for application_id in list_of_applications:
     df_applications = save_application_wi_into_data_frame(application_id, df_applications)
 
 # print(df_applications.T)
-df_applications.to_csv('__ms_applications_extract.csv')
+df_applications.to_csv('./results/__ms_applications_extract.csv')
 
 
 # get list of servers
@@ -500,7 +507,7 @@ for server in list_of_servers:
     df_servers = save_server_wi_into_data_frame(server, df_servers)
 
 # print(df_servers)
-df_servers.to_csv('__ms_servers_extract.csv')
+df_servers.to_csv('./results/__ms_servers_extract.csv')
 
 
 # map applications with servers
@@ -509,7 +516,7 @@ for application_id in list_of_all_applications:
     df_map_server_vs_app = save_map_server_vs_app(application_id, df_map_server_vs_app)
 
 # print(df_map_server_vs_app)
-df_map_server_vs_app.to_csv('__ms_mapping.csv')
+df_map_server_vs_app.to_csv('./results/__ms_mapping.csv')
 
 
 end_time = time.time()/60 # sec
