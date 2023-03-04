@@ -141,22 +141,6 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
     # list of app attributes
     # is used to use cycles
     app_attributes = []
-    '''
-    app_attributes = [
-        application_wi_id, 
-        wi_title, 
-        wi_env, 
-        wi_state, 
-        wi_entity, 
-        # wi_pln_asmnt_date, 
-        # wi_pln_rplcn_date, 
-        wi_pst_mig_date, # planned cut-over
-        # wi_pln_dsgn_date, 
-        # wi_pln_go_live_date, 
-        wi_mig_date, # actual cut-over
-        wi_wave
-    ]
-    '''
 
     # list of keys in ADO
     app_keys_ado = [
@@ -174,29 +158,29 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         "Custom.BlockerReason",
         "Custom.DeScopingDetails" # should go deeper
         "Custom.DeScopingDetails", # should go deeper
-        "Flow opening confirmation", # not available # why not empty
-        "Last minute reschedule",
+        "Custom.Status", # FW opening
+        "Last minute reschedule", # not available
         "Custom.MigrationEligibility", # ok
-        "Custom.Wave", # not available
-        "Internet access through proxies",
-        "Outbound Emails",
-        "Reverse Proxies",
-        "WAC",
-        "WAF",
-        "VPN",
-        "Load Balancer",
-        "Service Account in local AD domains",
-        "Encryption",
-        "Secret data",
-        "Fileshare",
-        "Administration through specific Jump servers",
-        "Access through specific Citrix Jump servers",
-        "Out of business hours",
-        "Zero downtime requirements",
-        "Risk level", 
+        "Custom.Wave",
+        "Custom.Internetaccessthroughproxies",
+        "Custom.OutboundEmails",
+        "Custom.ReverseProxies",
+        "WAC", # not available
+        "Custom.WAF",
+        "Custom.VPN",
+        "Custom.LoadBalancer",
+        "Custom.ServiceAccountinlocalADdomains", # Service Account in local AD domains
+        "Custom.Encryption", 
+        "Custom.SecretData",
+        "Custom.FileShare",
+        "Custom.AdminJumpServer",
+        "Custom.AccessthroughspecificCitrixJumpservers",
+        "Out of business hours", # not available
+        "Zero downtime requirements", # not available
+        "Custom.RiskLevel", 
         "Custom.ApplicationOwnershipOrganization",
-        "Sign-off DBA",
-        "Sign-off Entity",
+        "Sign-off DBA", # not available
+        "Sign-off Entity", # not available
         # "System.RevisedDate",
         #"Custom.Wave"
     ]
@@ -222,35 +206,16 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
     # add list of servers
     list_of_ids_of_servers = []
     # list_of_ids_of_servers = get_server_wi_ids_from_application(application_wi_id)
-    #
-    #
-    #
+
     new_row = app_attributes
-    #
-    #
-    #
-    '''
-    new_row = [
-        application_wi_id, 
-        wi_title, 
-        wi_env, 
-        wi_state, 
-        wi_entity, 
-        wi_pln_asmnt_date, 
-        wi_pln_rplcn_date, 
-        wi_pst_mig_date, 
-        wi_pln_dsgn_date, 
-        wi_pln_go_live_date, 
-        wi_wave
-        ]
-    '''
+
     new_df = pd.DataFrame([new_row], columns=cols_app)
     
     # load data into a DataFrame object:
     df_applications = pd.concat([df_applications, new_df], ignore_index = True)
 
     return df_applications
-
+    
 
 def get_server_wi_ids_from_feature(feature_id):
     """
@@ -526,19 +491,22 @@ for application_id in list_of_applications:
     df_applications = save_application_wi_into_data_frame(application_id, df_applications)
 
 # print(df_applications)
-df_applications.to_csv('__tcs_applications_extract.csv')
+df_applications.to_csv('./results/__tcs_applications_extract.csv')
 
 
 
 # get list of servers
 # for each server save into df
+#
+#
+#
 
 list_of_servers = get_all_servers_list_from_ado()
 for server in list_of_servers:
     df_servers = save_server_wi_into_data_frame(server, df_servers)
 
 # print(df_servers)
-df_servers.to_csv('__tcs_servers_extract.csv')
+df_servers.to_csv('./results/__tcs_servers_extract.csv')
 
 
 # map applications with servers
