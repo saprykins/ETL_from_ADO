@@ -8,3 +8,7 @@ I need: Azure Cli -> Blob -> Power BI
    NOK: CLI -> Blob
    OK:  Blob -> Power BI
    OK:  Cli -> Blob (File share)
+
+Next step: 
+   CRON
+   use shell to run several python files and send all to blobs
