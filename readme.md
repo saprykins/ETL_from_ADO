@@ -5,10 +5,10 @@ https://learn.microsoft.com/en-us/azure/devops/boards/backlogs/organize-backlog?
 
 As of 04/03/2023:  
 I need: Azure Cli -> Blob -> Power BI  
-   NOK: CLI -> Blob
-   OK:  Blob -> Power BI
-   OK:  Cli -> Blob (File share)
+NOK: CLI -> Blob  
+OK:  Blob -> Power BI  
+OK:  Cli -> Blob (File share)  
 
-Next step: 
-   CRON
-   use shell to run several python files and send all to blobs
+Next step:  
+1/ CRON  
+2/ use shell to run several python files and send all to blobs  
