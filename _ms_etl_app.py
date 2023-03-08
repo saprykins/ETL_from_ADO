@@ -73,7 +73,7 @@ cols_map_servers_apps = ["Server id in ADO", "App id in ADO"]
 df_applications = pd.DataFrame([],  columns = cols_app)
 df_servers = pd.DataFrame([],  columns = cols_servers)
 df_map_server_vs_app = pd.DataFrame([],  columns = cols_map_servers_apps)
-df_dates = pd.read_csv('./results/__afa_dates.csv')
+# df_dates = pd.read_csv('./results/__afa_dates.csv')
 # pd.set_option('display.max_rows', df_dates.shape[0]+1)
 # print(df_dates)
 
@@ -422,7 +422,9 @@ def get_all_servers_list_from_ado():
         url = url,
         headers=headers,
     )
+
     servers_raw_data = response.json()["workItems"]
+
     for server in servers_raw_data:
         list_of_all_servers.append(server["id"])
     return list_of_all_servers
