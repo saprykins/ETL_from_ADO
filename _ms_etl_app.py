@@ -29,8 +29,9 @@ cols_app =  [
     "Environment",
     "State", 
     "Entity",
-    "Planned cut-over date",
-    "Actual cut-over date",
+    "Planned migration date",
+    "Actual migration startdate",
+    "Actual migration enddate",
     # "Planned Assessment Date", 
     # "Planned Replication Date", 
     # "PlannedPostMigrationDate", 
@@ -76,6 +77,7 @@ df_map_server_vs_app = pd.DataFrame([],  columns = cols_map_servers_apps)
 # df_dates = pd.read_csv('./results/__afa_dates.csv')
 # pd.set_option('display.max_rows', df_dates.shape[0]+1)
 # print(df_dates)
+
 
 def get_mig_date(playbook_id):
     try:
@@ -149,6 +151,7 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         "Custom.Entity",
         "Custom.PlannedStartDate", # planned cut-over date
         "Custom.MigrationStartDate",
+        "Custom.MigrationEndDate", # new field
         # "Custom.PlannedAssessmentDate",
         # "Custom.PlannedReplicationDate",
         
@@ -470,7 +473,8 @@ def save_map_server_vs_app(application_wi_id, df_map_server_vs_app):
 
 
 
-
+# df_tempo = save_application_wi_into_data_frame(68864, df_applications)
+# print(df_tempo.T)
 
 
 # MAIN
