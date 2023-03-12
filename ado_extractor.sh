@@ -3,10 +3,10 @@ source ./venv/bin/activate
 
 ACCOUNT_KEY="1***"
 
-python _ms_etl_app_w_dates.py
-
-python _tcs_etl_app_w_dates.py
-
+python _ms_etl_app_w_dates_end_date.py
+python _tcs_etl_app_w_dates_enddate.py
+python get_ms_history.py
+python get_tcs_history.py
 python _read_csv.py
 
 # sends files to Azure azuredevops-fs
