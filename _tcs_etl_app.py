@@ -29,8 +29,9 @@ cols_app =  [
     "Environment",
     "State", 
     "Entity",
-    "Planned cut-over date",
-    "Actual cut-over date",
+    "Planned migration date",
+    "Actual migration startdate",
+    "Actual migration enddate",
     # "Planned Assessment Date", 
     # "Planned Replication Date", 
     # "PlannedPostMigrationDate", 
@@ -150,6 +151,7 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         "Custom.Entity",
         "Custom.202e1741-c1e6-4f30-b29f-d0b52c686578", # planned cut-over date
         "Custom.ActualCutOverDate",
+        "Custom.ActualCutOverEndDate", # i konw it doesn't exist
         # "Custom.PlannedAssessmentDate",
         # "Custom.PlannedReplicationDate",
         
@@ -463,6 +465,8 @@ def save_map_server_vs_app(application_wi_id, df_map_server_vs_app):
 
 
 
+# df_tempo = save_application_wi_into_data_frame(99689, df_applications)
+# print(df_tempo.T)
 
 # MAIN
 # global storage var
