@@ -15,6 +15,7 @@ organization = 'g**'
 project = 'M**'
 
 
+# https://dev.azure.com/go-gl-pr-migfactory-axa365/Migration_Factory/_apis/wit/workItems/110355/updates?api-version=7.0
 # exports only yet to start, 
 # in fact: yet to start + ready for mig
 
