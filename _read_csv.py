@@ -19,7 +19,8 @@ df4 = pd.merge(df3, df_history, on=['App id in ADO'])
 
 # print(df4.T)
 
-df_tcs = df4.drop(["Unnamed: 0_x", "Server id in ADO", "Unnamed: 0_y", "App id in ADO"], axis=1)
+df_tcs = df4.drop(["Unnamed: 0_x", "Unnamed: 0_y", "App id in ADO"], axis=1)
+# df_tcs = df4.drop(["Unnamed: 0_x", "Server id in ADO", "Unnamed: 0_y", "App id in ADO"], axis=1)
 # df4=df3.drop([df3.columns[0], df3.columns[1]], axis=1)
 # pritn(df_tcs)
 # df4.to_csv('./results/__xxx_tcs.csv',index=False)
@@ -55,7 +56,10 @@ df3 = pd.merge(df_servers,df_map, on=['Server id in ADO'])
 
 # df4 = pd.merge(df3,df_apps, on=['App id in ADO'], how = "outer")
 df4 = pd.merge(df3,df_apps, on=['App id in ADO'])
-df_4c = df4.drop(["Unnamed: 0", "Unnamed: 0_x", "Server id in ADO", "Unnamed: 0_y", "Unnamed: 0"], axis=1)
+
+df_4c = df4.drop(["Unnamed: 0", "Unnamed: 0_x", "Unnamed: 0_y", "Unnamed: 0"], axis=1)
+# df_4c = df4.drop(["Unnamed: 0", "Unnamed: 0_x", "Server id in ADO", "Unnamed: 0_y", "Unnamed: 0"], axis=1)
+
 # df_x.to_csv('./results/__xxx_ms.csv',index=False)
 
 
@@ -103,6 +107,7 @@ df5_outer_join.to_excel('./results/ADO_MS_outer_join.xlsx', sheet_name='ms_all',
 # print(df_tcs)
 # print(df_ms)
 union_dfs = pd.concat([df_ms, df_tcs])
+union_dfs = union_dfs.drop(["Unnamed: 0"], axis=1)
 # union_dfs = pd.concat([df_tcs])
 # union_dfs.to_csv('ADO_extract.csv',index=False)
 # print(union_dfs)
