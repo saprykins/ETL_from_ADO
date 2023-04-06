@@ -20,3 +20,8 @@ https://www.jcchouinard.com/python-automation-with-cron-on-mac/?utm_content=cmp-
 ```
 https://towardsdatascience.com/create-your-first-cronjob-on-the-linux-server-74e2fdc76e78#:~:text=Cron%20is%20a%20system%20that,%2C%20daily%2C%20monthly%2C%20etc.
 ```
+
+Post docs
+```
+https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/work-items/update?view=azure-devops-rest-7.0&tabs=HTTP
+```
