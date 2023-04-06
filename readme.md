@@ -25,3 +25,7 @@ Post docs
 ```
 https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/work-items/update?view=azure-devops-rest-7.0&tabs=HTTP
 ```
+Post steps:  
+1/ get list of all apps in excel  
+2/ get links to each app  
+3/ add the task to each app  
