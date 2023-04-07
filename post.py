@@ -5,8 +5,7 @@ import base64
 pat = 'j*'
 organization = 'g*'
 project = 'ADO%20Testing'
-workitemtype = "task"
-
+workitemtype = "Playbook"
 
 # 1/ get all apps
 # 2/ get link for each application
@@ -40,12 +39,13 @@ def get_all_applications_list_from_ado():
     return list_of_all_applications
 
 # app_list = get_all_applications_list_from_ado()
-# print(len(app_list))
-app_list = [172056]
+# print(app_list)
+app_list = [172056] # POC
 
+app = app_list[0]
+# print(app)
 
 # 2/
-
 def get_app_url(application_wi_id):   
    
     url = 'https://dev.azure.com/' + organization + '/_apis/wit/workItems/' + str(application_wi_id) + '?$expand=all'
@@ -63,14 +63,15 @@ def get_app_url(application_wi_id):
     lnk = response.json()["url"]
     return lnk
 
+'''
 for app in app_list:
     lnk = get_app_url(app)
     print(lnk)
+'''
 
 
 
-
-# 3/ 
+# 3/
 # url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/workitems/$" + workitemtype + "?api-version=7.0"
 url = "https://dev.azure.com/{}/{}/_apis/wit/workitems/${}?api-version=7.0".format(organization, project, workitemtype)
 
@@ -78,38 +79,67 @@ headers = {
     "Content-Type": "application/json-patch+json"
 }
 
+# "System.Title": "2 - Assess"
+# "Custom.Playbook_Phase": "2 - Assess"
+# "Custom.PlaybookActivities": "2.2 Detailed application assessment"
+# "Custom.PlaybookSubActivities": "Application discovery (platform, database, security, operations)"
+# "Custom.PlaybookOwner": "TCS",
+# "Custom.PlaybookOwnerTeam": "Migration team" # not always
+# "Custom.PlaybookDetails": "List of servers, DB, IP address, matrix flow… / ADS done in parallel",
+
 body = [
     {
     "op": "add",
     "path": "/fields/System.Title",
-    "value": "Sample Task 8"
+    "value": "8 - Decom"
+    },
+    #{
+    #"op": "add",
+    #"path": "/fields/Custom.Playbook_Phase",
+    #"value": "8 - Decom"
+    #},
+    {
+    "op": "add",
+    "path": "/fields/Custom.PlaybookActivities",
+    "value": "8.0 Detailed decom"
     },
     {
     "op": "add",
-    "path": "/fields/System.Description",
-    "value": "has parent"
+    "path": "/fields/Custom.PlaybookSubActivities",
+    "value": "text here"
+    },
+
+    {
+    "op": "add",
+    "path": "/fields/Custom.PlaybookOwner",
+    "value": "TCS"
     },
     {
     "op": "add",
-    "path": "/fields/System.IterationPath",
-    "value": "ADO Testing\\Sprint 1"
+    "path": "/fields/Custom.PlaybookOwnerTeam",
+    "value": "Migration team"
+    },
+    {
+    "op": "add",
+    "path": "/fields/Custom.PlaybookDetails",
+    "value": "another text here"
     },
     {
     "op": "add",
     "path": "/fields/System.Parent",
-    "value": "173988"
+    "value": app
     },
     {
     "op": "add",
     "path": "/relations/-",
     "value": {
         "rel":"System.LinkTypes.Hierarchy-Reverse",
-        "url":"https://dev.azure.com/go-gl-pr-migfactory-axa365/1e294b14-8de0-43b1-962a-4fe4275e31c7/_apis/wit/workItems/173988"
+        "url":get_app_url(app)
         }
     }
 ]
 
-"""
+
 r = requests.post(
     url,
     data=json.dumps(body),
@@ -119,4 +149,4 @@ r = requests.post(
 )
 
 print(r)
-"""
+
