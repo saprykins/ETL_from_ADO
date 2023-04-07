@@ -38,12 +38,6 @@ def get_all_applications_list_from_ado():
         list_of_all_applications.append(application["id"])
     return list_of_all_applications
 
-# app_list = get_all_applications_list_from_ado()
-# print(app_list)
-app_list = [172056] # POC
-
-app = app_list[0]
-# print(app)
 
 # 2/
 def get_app_url(application_wi_id):   
@@ -72,81 +66,95 @@ for app in app_list:
 
 
 # 3/
-# url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/workitems/$" + workitemtype + "?api-version=7.0"
-url = "https://dev.azure.com/{}/{}/_apis/wit/workitems/${}?api-version=7.0".format(organization, project, workitemtype)
+def add_task_to_one_tcs_app(app):
+    # url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/workitems/$" + workitemtype + "?api-version=7.0"
+    url = "https://dev.azure.com/{}/{}/_apis/wit/workitems/${}?api-version=7.0".format(organization, project, workitemtype)
 
-headers = {
-    "Content-Type": "application/json-patch+json"
-}
-
-# "System.Title": "2 - Assess"
-# "Custom.Playbook_Phase": "2 - Assess"
-# "Custom.PlaybookActivities": "2.2 Detailed application assessment"
-# "Custom.PlaybookSubActivities": "Application discovery (platform, database, security, operations)"
-# "Custom.PlaybookOwner": "TCS",
-# "Custom.PlaybookOwnerTeam": "Migration team" # not always
-# "Custom.PlaybookDetails": "List of servers, DB, IP address, matrix flow… / ADS done in parallel",
-
-body = [
-    {
-    "op": "add",
-    "path": "/fields/System.Title",
-    "value": "8 - Decom"
-    },
-    #{
-    #"op": "add",
-    #"path": "/fields/Custom.Playbook_Phase",
-    #"value": "8 - Decom"
-    #},
-    {
-    "op": "add",
-    "path": "/fields/Custom.PlaybookActivities",
-    "value": "8.0 Detailed decom"
-    },
-    {
-    "op": "add",
-    "path": "/fields/Custom.PlaybookSubActivities",
-    "value": "text here"
-    },
-
-    {
-    "op": "add",
-    "path": "/fields/Custom.PlaybookOwner",
-    "value": "TCS"
-    },
-    {
-    "op": "add",
-    "path": "/fields/Custom.PlaybookOwnerTeam",
-    "value": "Migration team"
-    },
-    {
-    "op": "add",
-    "path": "/fields/Custom.PlaybookDetails",
-    "value": "another text here"
-    },
-    {
-    "op": "add",
-    "path": "/fields/System.Parent",
-    "value": app
-    },
-    {
-    "op": "add",
-    "path": "/relations/-",
-    "value": {
-        "rel":"System.LinkTypes.Hierarchy-Reverse",
-        "url":get_app_url(app)
-        }
+    headers = {
+        "Content-Type": "application/json-patch+json"
     }
-]
+
+    # "System.Title": "2 - Assess"
+    # "Custom.Playbook_Phase": "2 - Assess" # NOT IMPLEMENTED CUZ PROVOKES ERROR
+    # "Custom.PlaybookActivities": "2.2 Detailed application assessment"
+    # "Custom.PlaybookSubActivities": "Application discovery (platform, database, security, operations)"
+    # "Custom.PlaybookOwner": "TCS",
+    # "Custom.PlaybookOwnerTeam": "Migration team" # not always
+    # "Custom.PlaybookDetails": "List of servers, DB, IP address, matrix flow… / ADS done in parallel",
+
+    body = [
+        {
+        "op": "add",
+        "path": "/fields/System.Title",
+        "value": "3 - Prepare"
+        },
+        #{
+        #"op": "add",
+        #"path": "/fields/Custom.Playbook_Phase",
+        #"value": "8 - Decom"
+        #},
+        {
+        "op": "add",
+        "path": "/fields/Custom.PlaybookActivities",
+        "value": "3.6 System preparation"
+        },
+        {
+        "op": "add",
+        "path": "/fields/Custom.PlaybookSubActivities",
+        "value": "Service account"
+        },
+
+        {
+        "op": "add",
+        "path": "/fields/Custom.PlaybookOwner",
+        "value": "TCS"
+        },
+        {
+        "op": "add",
+        "path": "/fields/Custom.PlaybookOwnerTeam",
+        # "value": "Migration team"
+        "value": "Application owner"
+        },
+        {
+        "op": "add",
+        "path": "/fields/Custom.PlaybookDetails",
+        "value": "Check if Service account is used, and if it uses admin role. More deails: 'https://confluence.axa.com/confluence/display/PIaaSExit/Task%3A+Service+account+-+admin'"
+        },
+        {
+        "op": "add",
+        "path": "/fields/System.Parent",
+        "value": app
+        },
+        {
+        "op": "add",
+        "path": "/relations/-",
+        "value": {
+            "rel":"System.LinkTypes.Hierarchy-Reverse",
+            "url":get_app_url(app)
+            }
+        }
+    ]
 
 
-r = requests.post(
-    url,
-    data=json.dumps(body),
-    headers=headers,
-    auth=("", pat), 
-    # timeout=60,
-)
+    r = requests.post(
+        url,
+        data=json.dumps(body),
+        headers=headers,
+        auth=("", pat), 
+        # timeout=60,
+    )
 
-print(r)
+    print(r)
 
+
+# MAIN
+
+app_list = get_all_applications_list_from_ado()
+# print(app_list)
+# app_list = [172056] # POC
+
+# app = app_list[0]
+# print(app)
+
+for app in app_list:
+    add_task_to_one_tcs_app(app)
