@@ -86,7 +86,7 @@ def add_task_to_one_tcs_app(app):
         {
         "op": "add",
         "path": "/fields/System.Title",
-        "value": "3 - Prepare"
+        "value": "6 - Stabilize"
         },
         #{
         #"op": "add",
@@ -96,12 +96,12 @@ def add_task_to_one_tcs_app(app):
         {
         "op": "add",
         "path": "/fields/Custom.PlaybookActivities",
-        "value": "3.6 System preparation"
+        "value": "6.5 Check Backup are active"
         },
         {
         "op": "add",
         "path": "/fields/Custom.PlaybookSubActivities",
-        "value": "Service account"
+        "value": "Check VM backup in place and happening as expected"
         },
 
         {
@@ -113,12 +113,12 @@ def add_task_to_one_tcs_app(app):
         "op": "add",
         "path": "/fields/Custom.PlaybookOwnerTeam",
         # "value": "Migration team"
-        "value": "Application owner"
+        "value": "Cloud Broker"
         },
         {
         "op": "add",
         "path": "/fields/Custom.PlaybookDetails",
-        "value": "Check if Service account is used, and if it uses admin role. More deails: 'https://confluence.axa.com/confluence/display/PIaaSExit/Task%3A+Service+account+-+admin'"
+        "value": " "
         },
         {
         "op": "add",
