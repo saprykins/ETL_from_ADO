@@ -66,6 +66,7 @@ cols_app =  [
     "Sign-off Entity", # NOK
     # "Last update",
     # "Wave"
+    "Schedule_change_Description"
     ]
 
 # cols_servers = ["Server id in ADO", "Title", "FQDN", "Sign-off Ops", "Sign-off Cyber"]
@@ -171,7 +172,7 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         "Custom.WAF",
         "Custom.VPN",
         "Custom.LoadBalancer",
-        "Custom.ServiceAccountinlocalADdomains", # Service Account in local AD domains
+        "Custom.ServiceAccountinlocalADdomains", # Service Account in local AD domains
         "Custom.Encryption", 
         "Custom.SecretData",
         "Custom.FileShare",
@@ -185,6 +186,7 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         "Sign-off Entity", # not available
         # "System.RevisedDate",
         #"Custom.Wave"
+        "System.Description"
     ]
 
     # Try to get data from ADO using keys, 
@@ -200,7 +202,17 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
     # app_attributes[0] = application_wi_id
     app_attributes.insert(0, application_wi_id)
     # app_attributes.insert(len(app_attributes)+1, "wave_2")
-    
+    # app_attributes[-1] = "lol"
+    # description = response.json()["fields"]["System.Description"]
+    # app_attributes[-1] = html2text.html2text(description)
+
+    # text html line
+    try:
+        description = response.json()["fields"]["System.Description"]
+        app_attributes[-1] = html2text.html2text(description)
+    except: 
+        app_attributes[-1] = ""
+
 
 
     # wi_wave = "wave_2"
@@ -218,6 +230,14 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
 
     return df_applications
     
+#
+#
+#
+# app = save_application_wi_into_data_frame(172056, df_applications)
+# print(app.T)
+#
+#
+#
 
 def get_server_wi_ids_from_feature(feature_id):
     """
@@ -255,7 +275,7 @@ def get_server_wi_ids_from_feature(feature_id):
 
 def get_server_wi_ids_from_application(application_id):
     """
-    Given app_id, this function gets ids of its servers
+    Given app_id, this function gets ids of its serversf
     """
 
     url = 'https://dev.azure.com/' + organization + '/_apis/wit/workItems/' + str(application_id) + '?$expand=all'
@@ -301,7 +321,8 @@ def get_server_wi_ids_from_application(application_id):
     return servers_id
 
 
-def get_sign_off_status(sign_off_id): 
+def get_sign_off_status(sign_off_id):
+    # print(sign_off_id)
     """
     input - id of sign-off
     output - state and sign_off_type (cyber (0), ops(1), entity(2), dba(3))
@@ -331,8 +352,8 @@ def get_sign_off_status(sign_off_id):
     elif sign_off_title == "Entity Sign-Off":
         sign_off_type = '2'
         state = response.json()["fields"]["System.State"]
-
     sign_off_data = [sign_off_type, state]
+    # print(sign_off_data, "; sign_off_id: ", sign_off_id)
     return sign_off_data
 
 
@@ -385,7 +406,11 @@ def save_server_wi_into_data_frame(server_wi_id, df_servers):
             sign_off_id = int(raw_id[start_line:])
 
             # list with 2 fields: 1/0 for cyber, 1 for ops; 2/state
-            sign_off_data = get_sign_off_status(sign_off_id)
+            try:
+                sign_off_data = get_sign_off_status(sign_off_id)
+            except:
+                sign_off_data = ["x", "y"]
+
             if sign_off_data[0] == '0':
                 sign_off_cyber_state = sign_off_data[1]
 
