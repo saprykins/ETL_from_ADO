@@ -65,7 +65,8 @@ cols_app =  [
     "Sign-off DBA", # NOK
     "Sign-off Entity", # NOK
     # "Last update",
-    # "Wave"
+    # "Wave", 
+    "Schedule_change_Description"
     ]
 
 cols_servers = ["Server id in ADO", "Server", "FQDN", "Sign-off Ops", "Sign-off Cyber"]
@@ -88,7 +89,7 @@ def get_mig_date(playbook_id):
     return date
 
 
-
+'''
 def get_app_list_for_the_wave(list_of_applications):
     """
     Extract app ids
@@ -119,6 +120,64 @@ def get_app_list_for_the_wave(list_of_applications):
         if (relation["rel"] == None):
             list_of_applications.append(relation["target"]["id"])
     return list_of_applications
+'''
+
+
+def get_app_list_for_the_wave(list_of_applications):
+    """
+    Contains 2 parts: wave2 and entity AFA
+    """
+    # part 1 (getting avanade apps)
+    url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/wiql/164ad2f6-0145-4e7a-9f73-fc55fd3fec55" # avanade only
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Basic '+ authorization
+    }
+    response = requests.get(
+        url = url,
+        headers=headers,
+    )
+    try:
+        wi_relations = response.json()["workItemRelations"]
+    except: 
+        wi_relations = ""
+
+    for relation in wi_relations:
+        if (relation["rel"] == None):
+            list_of_applications.append(relation["target"]["id"])
+
+    # part 2 (getting microsoft apps)
+    url = "https://dev.azure.com/" + organization + "/" + project + "/_apis/wit/wiql/584df56d-f4da-43e2-913d-a167b73916e1" # ms only
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Basic '+ authorization
+    }
+    response = requests.get(
+        url = url,
+        headers=headers,
+    )
+
+    list_of_all_ms_applications = [] # 
+    applications_raw_data = response.json()["workItems"]
+    for application in applications_raw_data:
+        list_of_all_ms_applications.append(application["id"])
+    # return list_of_all_applications
+
+    list_of_applications = list_of_applications + list_of_all_ms_applications
+    
+    return list_of_applications
+
+#
+#
+#
+# list_of_applications = []
+# xy_list = get_app_list_for_the_wave(list_of_applications)
+# print(len(xy_list))
+# print(xy_list)
+#
+#
+#
+
 
 
 def save_application_wi_into_data_frame(application_wi_id, df_applications):   
@@ -185,6 +244,7 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         "Sign-off Entity",
         # "System.RevisedDate",
         #"Custom.Wave"
+        "System.Description"
     ]
 
     # Try to get data from ADO using keys, 
@@ -196,6 +256,7 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         except: 
             # app_attributes[i+1] = ""
             app_attributes.insert(i+1, "")
+
     
     # app_attributes[0] = application_wi_id
     app_attributes.insert(0, application_wi_id)
@@ -208,7 +269,29 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
         date = ""
     app_attributes[5] = date
     """
-    app_attributes[-3] = "Microsoft"
+    app_attributes[-4] = "Microsoft"
+
+    # default description 
+    default_description_1 = "Add Application all"
+    default_description_2 = "Add short description"
+
+    # line with html code that requires text treatment: 
+    try:
+        # app_attributes[i+1] = response.json()["fields"][app_keys_ado[i]] # may be need to string
+        description = response.json()["fields"]["System.Description"]
+        description = html2text.html2text(description)
+        # print("descr: ", description)
+        # message.startswith('Python')
+        # if (description.startswith(default_description_1) OR (description.startswith(default_description_2):
+        if (((description.startswith(default_description_1)) | (description.startswith(default_description_2)))):
+        # if (description.startswith("Add short description")):
+            description = ""
+            app_attributes[-1] = description
+        else:
+            app_attributes[-1] = html2text.html2text(description)
+    except: 
+        # app_attributes[i+1] = ""
+        app_attributes[-1] = ""
 
     # app_attributes.insert(len(app_attributes)+1, "wave_2")
     # add list of servers
@@ -227,7 +310,7 @@ def save_application_wi_into_data_frame(application_wi_id, df_applications):
 #
 #
 #
-# dft = save_application_wi_into_data_frame(124554, df_applications)
+# dft = save_application_wi_into_data_frame(133503, df_applications)
 # print("---")
 # print(dft.T)
 # print("---")
@@ -393,7 +476,12 @@ def save_server_wi_into_data_frame(server_wi_id, df_servers):
             sign_off_id = int(raw_id[start_line:])
 
             # list with 2 fields: 1/0 for cyber, 1 for ops; 2/state
-            sign_off_data = get_sign_off_status(sign_off_id)
+            try:
+                sign_off_data = get_sign_off_status(sign_off_id)
+            except:
+                sign_off_data = ["x", "y"]
+
+
             if sign_off_data[0] == '0':
                 sign_off_cyber_state = sign_off_data[1]
 
